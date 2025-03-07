@@ -1,14 +1,5 @@
 import cv2
 
-# img = input("Enter the image name: ")
-img = cv2.imread('source/yzu1.jpg')
-
-dot1 = [] 
-dot2 = [] 
-
-(height, width) = img.shape[:2]
-center = (width // 2, height // 2)
-
 # 定義旋轉函數
 def transFormImage(angle, scale):
     M = cv2.getRotationMatrix2D(center, angle, scale)
@@ -43,6 +34,37 @@ def show_xy(event, x, y, flag, param):
         img = img[dot1[1]:dot2[1], dot1[0]:dot2[0]]
         img = cv2.resize(img, (600, 600))
         cv2.imshow('Assignment1', img)
+
+def resizeImage(image_path, min_size=600, max_size=1000):
+    origin_img = cv2.imread(image_path)
+    (height, width) = origin_img.shape[:2]
+
+    scale_percent = 100
+    if max(width, height) > max_size:
+        scale_percent = max_size / max(width, height) * 100
+    elif min(width, height) < min_size:
+        scale_percent = min_size / min(width, height) * 100
+
+    width = int(width * scale_percent / 100)
+    height = int(height * scale_percent / 100)
+
+    return cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
+
+def getUpdateData():
+    (height, width) = img.shape[:2]
+    center = (width // 2, height // 2)
+
+    return center, height, width
+
+# img = input("Enter the image name: ")
+image_path = 'source/yzu1.jpg'
+img = resizeImage(image_path)
+
+dot1 = [] 
+dot2 = [] 
+
+(height, width) = img.shape[:2]
+center = (width // 2, height // 2)
 
 #固定視窗大小為800x600
 cv2.namedWindow('Assignment1')
