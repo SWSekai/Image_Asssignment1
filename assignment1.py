@@ -15,12 +15,12 @@ def trackerbarAngle(val):
 
 def trackerbarScale(val):
     scale = val/100.0 # 將縮放範圍設置成0.1~2.0
-    # angle = cv2.getTrackbarPos('Angle', 'Assignment1') - 180
+    angle = cv2.getTrackbarPos('Angle', 'Assignment1') - 180
     transFormImage(angle, scale)    
 
 # 定義滑鼠事件
 def cropImage(event, x, y, flag, param):
-    global dot1, dot2, img
+    global dot1, dot2, img, cropped_image, cropped_height, cropped_width, cropped_center, cropped_flag
     
     # 滑鼠拖曳發生時
     if flag == 1:
@@ -47,6 +47,7 @@ def cropImage(event, x, y, flag, param):
         # 將裁切後的圖像放置在背景上
         background[start_y:start_y+cropped_height, start_x:start_x+cropped_width] = cropped_image
 
+        cropped_center = (start_x + cropped_width/2 , start_y + cropped_height/2)
         img = background
         cv2.imshow('Assignment1', img)
 
@@ -80,12 +81,13 @@ def getData(image_name): #增加參數
 
     return height, width, center
 
-# image_path = input("Enter the image name: ")
-image_path = 'source/yzu1.jpg'
+image_path = input("Enter the image name: ")
+# image_path = 'source/yzu1.jpg'
 resizeImage(image_path)
 
 dot1 = [] 
-dot2 = [] 
+dot2 = []
+cropped_flag = False
 
 cv2.namedWindow('Assignment1')
 
@@ -97,7 +99,11 @@ cv2.createTrackbar('Angle', 'Assignment1', 180, 360, trackerbarAngle) #設定滑
 
 while True:
     key = cv2.waitKey(0)
-    # 按下ESC鍵退出
+
+    if key == 115:
+        cv2.imwrite('output.jpg', img)
+    
+    # 按下ESC鍵反悔所有操作
     if key == 27: 
         img = origin_img.copy()
         trackerBarInit()
@@ -105,6 +111,7 @@ while True:
     elif key == 113:
         break
 
+    # 如果視窗關閉，則退出
     if cv2.getWindowProperty('Assignment1', cv2.WND_PROP_VISIBLE) < 1:
         break
 
