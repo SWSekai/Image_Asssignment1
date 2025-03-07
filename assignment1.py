@@ -34,7 +34,7 @@ def CropImage(event, x, y, flag, param):
             cv2.imshow('Assignment1', img2)
     if event == 4:
         cropped_image = img[dot1[1]:dot2[1], dot1[0]:dot2[0]]
-        cropped_height, cropped_width = cropped_image.shape[:2]
+        cropped_height, cropped_width, cropped_center = getData(cropped_image)
 
         # 創建一個黑色背景的圖像，大小與原始視窗相同
         background = np.zeros((height, width, 3), dtype=np.uint8)
@@ -53,7 +53,7 @@ def resizeImage(image_path, min_size=600, max_size=1000):
     global width, height, center, img
 
     origin_img = cv2.imread(image_path)
-    (height, width) = origin_img.shape[:2]
+    height, width, center = getData(origin_img)
 
     scale_percent = 100
     if max(width, height) > max_size:
@@ -65,17 +65,17 @@ def resizeImage(image_path, min_size=600, max_size=1000):
     height = int(height * scale_percent / 100)
 
     img = cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
-    height, width, center = getUpdateData()
+    height, width, center = getData(img)
 
     cv2.imshow('Assignment1', img)
 
-def getUpdateData(): #增加參數
-    (height, width) = img.shape[:2]
+def getData(image_name): #增加參數
+    (height, width) = image_name.shape[:2]
     center = (width // 2, height // 2)
 
     return height, width, center
 
-# img = input("Enter the image name: ")
+# image_path = input("Enter the image name: ")
 image_path = 'source/yzu1.jpg'
 resizeImage(image_path)
 
