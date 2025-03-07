@@ -17,7 +17,8 @@ def trackerbarScale(val):
     angle = cv2.getTrackbarPos('Angle', 'Assignment1') -180
     transFormImage(angle, scale)    
 
-def show_xy(event, x, y, flag, param):
+# 定義滑鼠事件
+def CutImage(event, x, y, flag, param):
     global dot1, dot2, img
     
     # 滑鼠拖曳發生時
@@ -32,10 +33,14 @@ def show_xy(event, x, y, flag, param):
             cv2.imshow('Assignment1', img2)
     if event == 4:
         img = img[dot1[1]:dot2[1], dot1[0]:dot2[0]]
-        img = cv2.resize(img, (600, 600))
+
         cv2.imshow('Assignment1', img)
+        cv2.resizeWindow('Assignment1', 800, 600)
+
 
 def resizeImage(image_path, min_size=600, max_size=1000):
+    global width, height, center, img
+
     origin_img = cv2.imread(image_path)
     (height, width) = origin_img.shape[:2]
 
@@ -48,29 +53,32 @@ def resizeImage(image_path, min_size=600, max_size=1000):
     width = int(width * scale_percent / 100)
     height = int(height * scale_percent / 100)
 
-    return cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
+    img = cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
+    width, height, center = getUpdateData()
+
+    cv2.imshow('Assignment1', img)
 
 def getUpdateData():
     (height, width) = img.shape[:2]
     center = (width // 2, height // 2)
 
-    return center, height, width
+    return height, width, center
 
 # img = input("Enter the image name: ")
 image_path = 'source/yzu1.jpg'
-img = resizeImage(image_path)
+resizeImage(image_path)
+
+cv2.imshow('Assignment1', img)
+height, width, center = getUpdateData() 
 
 dot1 = [] 
 dot2 = [] 
-
-(height, width) = img.shape[:2]
-center = (width // 2, height // 2)
 
 #固定視窗大小為800x600
 cv2.namedWindow('Assignment1')
 # cv2.resizeWindow('Assignment1', 800, 600) #待處理
 
-cv2.setMouseCallback('Assignment1', show_xy) # 設定滑鼠事件
+cv2.setMouseCallback('Assignment1', CutImage) # 設定滑鼠事件
 
 cv2.createTrackbar('Scale', 'Assignment1', 10, 200, trackerbarScale) #設定滑桿(縮放比例)
 cv2.setTrackbarPos('Scale', 'Assignment1', 100)
