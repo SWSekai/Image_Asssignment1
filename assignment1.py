@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 # 定義旋轉函數
 def transFormImage(angle, scale):
@@ -18,7 +19,7 @@ def trackerbarScale(val):
     transFormImage(angle, scale)    
 
 # 定義滑鼠事件
-def CutImage(event, x, y, flag, param):
+def CropImage(event, x, y, flag, param):
     global dot1, dot2, img
     
     # 滑鼠拖曳發生時
@@ -32,11 +33,21 @@ def CutImage(event, x, y, flag, param):
             cv2.rectangle(img2, (dot1[0], dot1[1]), (dot2[0], dot2[1]), (0,0,255), 2)
             cv2.imshow('Assignment1', img2)
     if event == 4:
-        img = img[dot1[1]:dot2[1], dot1[0]:dot2[0]]
+        cropped_image = img[dot1[1]:dot2[1], dot1[0]:dot2[0]]
+        cropped_height, cropped_width = cropped_image.shape[:2]
 
+        # 創建一個黑色背景的圖像，大小與原始視窗相同
+        background = np.zeros((height, width, 3), dtype=np.uint8)
+
+        # 計算將裁切後的圖像置中的位置
+        start_x = (width - cropped_width) // 2
+        start_y = (height - cropped_height) // 2
+
+        # 將裁切後的圖像放置在背景上
+        background[start_y:start_y+cropped_height, start_x:start_x+cropped_width] = cropped_image
+
+        img = background
         cv2.imshow('Assignment1', img)
-        cv2.resizeWindow('Assignment1', 800, 600)
-
 
 def resizeImage(image_path, min_size=600, max_size=1000):
     global width, height, center, img
@@ -54,11 +65,11 @@ def resizeImage(image_path, min_size=600, max_size=1000):
     height = int(height * scale_percent / 100)
 
     img = cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
-    width, height, center = getUpdateData()
+    height, width, center = getUpdateData()
 
     cv2.imshow('Assignment1', img)
 
-def getUpdateData():
+def getUpdateData(): #增加參數
     (height, width) = img.shape[:2]
     center = (width // 2, height // 2)
 
@@ -68,17 +79,12 @@ def getUpdateData():
 image_path = 'source/yzu1.jpg'
 resizeImage(image_path)
 
-cv2.imshow('Assignment1', img)
-height, width, center = getUpdateData() 
-
 dot1 = [] 
 dot2 = [] 
 
-#固定視窗大小為800x600
 cv2.namedWindow('Assignment1')
-# cv2.resizeWindow('Assignment1', 800, 600) #待處理
 
-cv2.setMouseCallback('Assignment1', CutImage) # 設定滑鼠事件
+cv2.setMouseCallback('Assignment1', CropImage) # 設定滑鼠事件
 
 cv2.createTrackbar('Scale', 'Assignment1', 10, 200, trackerbarScale) #設定滑桿(縮放比例)
 cv2.setTrackbarPos('Scale', 'Assignment1', 100)
