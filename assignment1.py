@@ -15,15 +15,16 @@ def trackerbarAngle(val):
 
 def trackerbarScale(val):
     scale = val/100.0 # 將縮放範圍設置成0.1~2.0
-    angle = cv2.getTrackbarPos('Angle', 'Assignment1') -180
+    # angle = cv2.getTrackbarPos('Angle', 'Assignment1') - 180
     transFormImage(angle, scale)    
 
 # 定義滑鼠事件
-def CropImage(event, x, y, flag, param):
+def cropImage(event, x, y, flag, param):
     global dot1, dot2, img
     
     # 滑鼠拖曳發生時
     if flag == 1:
+        trackerBarInit()
         if event == 1:
             dot1 = [x, y]
         if event == 0:
@@ -50,10 +51,10 @@ def CropImage(event, x, y, flag, param):
         cv2.imshow('Assignment1', img)
 
 def resizeImage(image_path, min_size=600, max_size=1000):
-    global width, height, center, img
+    global width, height, center, img, origin_img
 
-    origin_img = cv2.imread(image_path)
-    height, width, center = getData(origin_img)
+    source_img = cv2.imread(image_path)
+    height, width, center = getData(source_img)
 
     scale_percent = 100
     if max(width, height) > max_size:
@@ -64,10 +65,14 @@ def resizeImage(image_path, min_size=600, max_size=1000):
     width = int(width * scale_percent / 100)
     height = int(height * scale_percent / 100)
 
-    img = cv2.resize(origin_img, (width, height), interpolation=cv2.INTER_LINEAR)
+    img = cv2.resize(source_img, (width, height), interpolation=cv2.INTER_LINEAR)
     height, width, center = getData(img)
-
     cv2.imshow('Assignment1', img)
+    origin_img = img.copy() # 保存resize後的圖像
+
+def trackerBarInit():
+    cv2.setTrackbarPos('Scale', 'Assignment1', 100)
+    cv2.setTrackbarPos('Angle', 'Assignment1', 180)
 
 def getData(image_name): #增加參數
     (height, width) = image_name.shape[:2]
@@ -84,11 +89,23 @@ dot2 = []
 
 cv2.namedWindow('Assignment1')
 
-cv2.setMouseCallback('Assignment1', CropImage) # 設定滑鼠事件
+cv2.setMouseCallback('Assignment1', cropImage) # 設定滑鼠事件
 
 cv2.createTrackbar('Scale', 'Assignment1', 10, 200, trackerbarScale) #設定滑桿(縮放比例)
 cv2.setTrackbarPos('Scale', 'Assignment1', 100)
 cv2.createTrackbar('Angle', 'Assignment1', 180, 360, trackerbarAngle) #設定滑桿(旋轉角度)
 
-cv2.waitKey(0)
+while True:
+    key = cv2.waitKey(0)
+    # 按下ESC鍵退出
+    if key == 27: 
+        img = origin_img.copy()
+        trackerBarInit()
+        cv2.imshow('Assignment1', img)
+    elif key == 113:
+        break
+
+    if cv2.getWindowProperty('Assignment1', cv2.WND_PROP_VISIBLE) < 1:
+        break
+
 cv2.destroyAllWindows()
